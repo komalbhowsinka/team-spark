@@ -225,18 +225,29 @@ function renderQuizResult(container) {
 // WORD HUNT — find pharma buzzwords in a grid
 // ════════════════════════════════════════════════
 
-// 4 sets — rotate daily so it feels fresh every day
-const WORD_SETS = [
-  ['HEOR', 'PBM', 'FDA', 'NDA', 'RWE'],
-  ['CMS', 'EHR', 'MAAT', 'IRA', 'KOL'],
-  ['API', 'AWS', 'GLP', 'DDW', 'ESI'],
-  ['PDUFA', 'BLA', 'NDA', 'FDA', 'CMS'],
+// ── Word Bank ─────────────────────────────────
+// 40 real pharma/health words, 5-8 characters.
+// 5 are picked randomly on every game load.
+// Short enough to fit the 10x10 grid.
+const WORD_BANK = [
+  'REBATE',    'COPAY',     'GENERIC',   'PATENT',
+  'CLINICAL',  'PIPELINE',  'MOLECULE',  'PRICING',
+  'PAYER',     'TRIAL',     'DOSAGE',    'LABEL',
+  'MARKET',    'ACCESS',    'LAUNCH',    'OUTCOME',
+  'PATIENT',   'SAFETY',    'EFFICACY',  'APPROVAL',
+  'COVERAGE',  'BENEFIT',   'THERAPY',   'CHRONIC',
+  'BRANDED',   'PROVIDER',  'MANAGED',   'CHANNEL',
+  'POLICY',    'BURDEN',    'PHARMA',    'NETWORK',
+  'BIOTECH',   'VACCINE',   'ADVERSE',   'COMPOUND',
+  'FORMULARY', 'SPECIALTY', 'ADHERENCE', 'APPROVED',
 ];
 
-function getDailyWords() {
-  return WORD_SETS[TODAY_SEED % WORD_SETS.length];
+// Pick 5 random words on every call
+// Math.random() = different every refresh — no seed
+function getRandomWords() {
+  const shuffled = [...WORD_BANK].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 5);
 }
-
 // Build a 10×10 letter grid with words hidden inside
 function buildGrid(words) {
   const SIZE = 10;
@@ -294,7 +305,7 @@ function buildGrid(words) {
 let wsState = null;
 
 function renderWordSearch(container) {
-  const words          = getDailyWords();
+  const words = getRandomWords();
   const { grid, placed } = buildGrid(words);
 
   wsState = {
