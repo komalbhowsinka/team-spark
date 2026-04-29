@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Spark ✨</title>
+
+  <!-- Google Fonts: Outfit (headings) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Our stylesheet (we create this in Step 3) -->
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ── BOTTOM NAV (2 tabs) ───────────────── -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="home">
+        <span class="icon">✨</span>
+        <span class="label">Spark</span>
+      </button>
+      <button class="tab-btn" data-tab="fun">
+        <span class="icon">🎮</span>
+        <span class="label">Fun Zone</span>
+      </button>
+    </nav>
+
+    <!-- ══════════════════════════════════════
+         TAB 1 — HOME (The Star Jar)
+    ══════════════════════════════════════ -->
+    <div class="tab-panel active" id="panel-home">
+
+      <header class="app-header">
+        <p class="app-eyebrow">for the ones who never quit</p>
+        <h1 class="app-title">Team<br/>Spark</h1>
+      </header>
+
+      <!-- The Jar -->
+      <section class="jar-section">
+        <div class="jar-container" id="jar" role="button" tabindex="0">
+          <div class="jar-stars"  id="jar-stars"></div>
+          <div class="jar-glass"></div>
+          <div class="jar-lid"></div>
+        </div>
+        <p class="tap-hint" id="tap-hint">tap the jar ✨</p>
+      </section>
+
+      <!-- Motivation card — hidden until jar is tapped -->
+      <div class="motivation-card" id="motivation-card" hidden>
+        <span class="quote-mark">"</span>
+        <p class="motivation-text" id="motivation-text"></p>
+        <div class="motivation-footer">
+          <span class="motivation-badge">today's spark</span>
+          <button class="btn-copy" id="btn-copy">copy 📋</button>
+        </div>
+      </div>
+
+    </div><!-- /panel-home -->
+
+    <!-- ══════════════════════════════════════
+         TAB 2 — FUN ZONE (Mini Games)
+    ══════════════════════════════════════ -->
+    <div class="tab-panel" id="panel-fun">
+
+      <header class="app-header">
+        <p class="app-eyebrow">new content daily</p>
+        <h1 class="app-title">Fun<br/>Zone</h1>
+      </header>
+
+      <!-- Game switcher tabs -->
+      <div class="game-tabs">
+        <button class="game-tab active" data-game="quiz">🧠 Pharma Quiz</button>
+        <button class="game-tab"        data-game="wordsearch">🔍 Word Hunt</button>
+      </div>
+
+      <!-- Games render here via JavaScript -->
+      <div class="game-container" id="game-container"></div>
+
+    </div><!-- /panel-fun -->
+
+  </div><!-- /#app -->
+
+  <!-- Confetti canvas (sits on top of everything) -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- JS entry point (type=module lets files talk to each other) -->
+  <script type="module" src="js/app.js"></script>
+
+</body>
+</html>
