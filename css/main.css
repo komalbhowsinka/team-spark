@@ -513,3 +513,42 @@ body::before {
 ::-webkit-scrollbar       { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ══════════════════════════════════════════
+   QUOTE SOURCE GLOW
+   Green = AI generated · Blue = from the vault
+══════════════════════════════════════════ */
+
+/* AI generated — green glow */
+.motivation-card.glow-ai {
+  border-color: rgba(74, 222, 128, 0.4);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(74, 222, 128, 0.2),
+    0 0 60px rgba(74, 222, 128, 0.1);
+  transition: border-color 0.4s, box-shadow 0.4s;
+}
+
+/* Hardcoded vault — blue glow */
+.motivation-card.glow-local {
+  border-color: rgba(96, 165, 250, 0.4);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(96, 165, 250, 0.2),
+    0 0 60px rgba(96, 165, 250, 0.1);
+  transition: border-color 0.4s, box-shadow 0.4s;
+}
+
+/* AI badge — green */
+.motivation-badge.badge-ai {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+  border-color: rgba(74, 222, 128, 0.3);
+}
+
+/* Vault badge — blue */
+.motivation-badge.badge-local {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.3);
+}
