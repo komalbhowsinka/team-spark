@@ -9,7 +9,7 @@
 export const AI_CONFIG = {
   // Your Cloudflare Worker — this is your secure proxy
   workerUrl: 'https://team-spark-ai.komalbhowsinka99.workers.dev',
-  model:     'llama-3.3-70b-versatile',
+  model:     'llama-3.1-8b-instant',
 };
 
 // Safety filter — rejects any AI response with these words
