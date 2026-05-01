@@ -199,8 +199,9 @@ function isSafe(text) {
 // 4 second timeout — if AI is slow, we give up
 // and use hardcoded quotes instead. User never waits.
 async function fetchAIMotivation() {
-  const { workerUrl, model } = AI_CONFIG;
-  if (!workerUrl) return null;
+  if (!AI_CONFIG || !AI_CONFIG.workerUrl) return null;
+  const workerUrl = AI_CONFIG.workerUrl;
+  const model     = AI_CONFIG.model;
 
   try {
     // AbortController = our 4 second timeout mechanism
