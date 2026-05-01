@@ -203,17 +203,18 @@ function isSafe(text) {
 // ── Optional Groq AI call ─────────────────────
 async function fetchAIMotivation() {
   const { apiKey } = AI_CONFIG;
-  if (!apiKey || apiKey === 'YOUR_GROQ_API_KEY_HERE') return null;
+  if (!workerUrl) return null;
 
   try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    // Calling Cloudflare and not groq api key (so Indirect call)
+    // The worker adds the secret key on its end
+    const res = await fetch(workerUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: AI_CONFIG.model,
+        model,
         max_tokens: 80,
         temperature: 0.9,
         messages: [
