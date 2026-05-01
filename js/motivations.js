@@ -38,33 +38,6 @@ const MOTIVATIONS = [
   "The hour before the world starts is the hour you make the world start your way.",
   "Greatness does not begin with a grand gesture. It begins with getting up.",
 
-  // ── FOCUS BEFORE NOON ─────────────────────
-  "Deep work doesn't happen by accident. It happens by closing the other 47 tabs.",
-  "Your most important task today is not urgent. That's exactly why it keeps getting skipped.",
-  "The difference between productive and busy is what you're doing with your attention.",
-  "Your brain does its best thinking before the first meeting. Guard that window like rent depends on it.",
-  "A clear morning mind is a competitive advantage. Protect it from email for at least one hour.",
-  "The hardest thing isn't doing the work. It's starting it. The rest is just momentum.",
-  "If it's important, it gets the morning. If it's urgent, it gets scheduled.",
-  "Great ideas arrive in the morning. Mediocre ones arrive after lunch meetings.",
-  "Every hour of focused work is worth three hours of scattered effort.",
-  "The meeting could have been an email. The email could have been clarity.",
-  "Clarity in the morning means fewer corrections at midnight.",
-  "You don't need more time. You need better time. There is a difference.",
-  "The project you keep postponing isn't waiting for the right moment. It's waiting for you.",
-  "One thing done well before 10am changes the trajectory of the entire day.",
-  "If your morning routine doesn't include time to think, you're reacting all day.",
-  "Not every task deserves your best hour. Learn which ones do. Give those the morning.",
-  "The inbox is a list of other people's priorities. Don't let it manage yours.",
-  "Block the time before you plan the work. An unprotected calendar is an unprotected day.",
-  "Morning focus is not about doing more. It's about doing the right thing first.",
-  "Write it down before you talk about it. Talking makes it feel done. Writing makes it real.",
-  "Your brain's first two hours are premium real estate. Stop renting them to notifications.",
-  "The question isn't whether you'll be productive today. The question is at what.",
-  "A sharp mind in the morning is not an accident. It is a practice.",
-  "Do the hard thing first. Everything after it is slightly easier by comparison.",
-  "The people who seem to get the most done aren't faster. They're clearer.",
-
   // ── RESILIENCE & GRIT ─────────────────────
   "A rough yesterday is not a rough tomorrow. New data. New day.",
   "The comeback is always more interesting than the cruise control.",
@@ -195,7 +168,7 @@ async function fetchAIMotivation() {
 
   try {
     const controller = new AbortController();
-    const timeout    = setTimeout(() => controller.abort(), 4000);
+    const timeout    = setTimeout(() => controller.abort(), 8000);
 
     const res = await fetch(workerUrl, {
       method: 'POST',
