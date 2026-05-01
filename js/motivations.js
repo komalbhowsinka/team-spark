@@ -4,11 +4,11 @@
 // Every tap → tries AI first (via Cloudflare Worker)
 // If AI fails, times out, or is unsafe → uses your
 // 125 hardcoded quotes silently. User never notices.
+// Returns { text, source } so jar.js knows which glow to show.
 // ================================================
 
 import { AI_CONFIG, CONTENT_FILTERS } from './ai-config.js';
 
-// ── Your Quote Library (125 quotes) ──────────
 const MOTIVATIONS = [
 
   // ── RISE & GRIND ──────────────────────────
@@ -149,13 +149,9 @@ const MOTIVATIONS = [
 ];
 
 // ── Session memory ────────────────────────────
-// Tracks which quotes showed this session → no repeats
-// until all 125 are exhausted, then resets
 const usedThisSession = new Set();
 
 // ── Daily seed ────────────────────────────────
-// Same date → same index → whole team sees same quote
-// on first tap of the day (only used as final fallback)
 function getDailyIndex() {
   const dateStr = new Date().toDateString();
   let hash = 5381;
@@ -173,22 +169,18 @@ function getLocalMotivation() {
     usedThisSession.add(idx);
     return MOTIVATIONS[idx];
   }
-
   if (usedThisSession.size >= MOTIVATIONS.length) {
     usedThisSession.clear();
   }
-
   let idx;
   do {
     idx = Math.floor(Math.random() * MOTIVATIONS.length);
   } while (usedThisSession.has(idx));
-
   usedThisSession.add(idx);
   return MOTIVATIONS[idx];
 }
 
-// ── Safety check on AI output ─────────────────
-// Rejects anything containing filtered terms
+// ── Safety check ──────────────────────────────
 function isSafe(text) {
   if (!text || text.length > 300) return false;
   const lower = text.toLowerCase();
@@ -196,15 +188,12 @@ function isSafe(text) {
 }
 
 // ── AI fetch via Cloudflare Worker ────────────
-// 4 second timeout — if AI is slow, we give up
-// and use hardcoded quotes instead. User never waits.
 async function fetchAIMotivation() {
   if (!AI_CONFIG || !AI_CONFIG.workerUrl) return null;
   const workerUrl = AI_CONFIG.workerUrl;
   const model     = AI_CONFIG.model;
 
   try {
-    // AbortController = our 4 second timeout mechanism
     const controller = new AbortController();
     const timeout    = setTimeout(() => controller.abort(), 4000);
 
@@ -229,28 +218,24 @@ no hustle culture clichés. One quote only. No quotation marks.`
       })
     });
 
-    clearTimeout(timeout); // AI responded in time
-
+    clearTimeout(timeout);
     if (!res.ok) return null;
     const data  = await res.json();
     const quote = data?.choices?.[0]?.message?.content?.trim();
     return isSafe(quote) ? quote : null;
 
   } catch {
-    // Timeout, network error, or anything else → silent fallback
     return null;
   }
 }
 
 // ── Main export ───────────────────────────────
-// Called by jar.js on every single tap.
-// AI first. Hardcoded if AI fails. Always instant.
+// Returns { text, source } — source is 'ai' or 'local'
+// jar.js uses source to decide which glow color to show
 export async function getMotivation() {
   const aiQuote = await fetchAIMotivation();
-
   if (aiQuote) {
-    return aiQuote; // ✅ AI worked
+    return { text: aiQuote, source: 'ai' };
   }
-
-  return getLocalMotivation(); // 🔄 fallback
+  return { text: getLocalMotivation(), source: 'local' };
 }
