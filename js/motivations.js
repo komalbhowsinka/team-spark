@@ -1,15 +1,9 @@
 // ================================================
 // js/motivations.js — The Quote Engine
 // ================================================
-// All quotes sourced from: good_morning_overachiever
-// Sections: Rise & Grind · Focus · Resilience ·
-//           High Performers · Joy & Humor
-//
-// How it works:
-//   Tap 1 → today's seeded quote (same for whole team)
-//   Tap 2+ → random, no repeats until all shown
-//   If Groq API key exists → tries AI first
-//   If no key / AI fails  → uses quotes below
+// Every tap → tries AI first (via Cloudflare Worker)
+// If AI fails, times out, or is unsafe → uses your
+// 125 hardcoded quotes silently. User never notices.
 // ================================================
 
 import { AI_CONFIG, CONTENT_FILTERS } from './ai-config.js';
@@ -154,65 +148,69 @@ const MOTIVATIONS = [
 
 ];
 
-// ── Session memory: no repeats until all 125 shown ──
+// ── Session memory ────────────────────────────
+// Tracks which quotes showed this session → no repeats
+// until all 125 are exhausted, then resets
 const usedThisSession = new Set();
 
-// ── Daily seed: converts today's date → stable index ──
-// "Tue Apr 29 2025" always maps to the same quote number
-// so the whole team sees the same quote on the same day
+// ── Daily seed ────────────────────────────────
+// Same date → same index → whole team sees same quote
+// on first tap of the day (only used as final fallback)
 function getDailyIndex() {
   const dateStr = new Date().toDateString();
   let hash = 5381;
   for (let i = 0; i < dateStr.length; i++) {
     hash = ((hash << 5) + hash) ^ dateStr.charCodeAt(i);
-    hash = hash & 0x7fffffff; // keep positive
+    hash = hash & 0x7fffffff;
   }
   return hash % MOTIVATIONS.length;
 }
 
-// ── Pick a quote locally ──────────────────────
+// ── Pick a local quote ────────────────────────
 function getLocalMotivation() {
-  // First tap of session = today's daily seeded quote
   if (usedThisSession.size === 0) {
     const idx = getDailyIndex();
     usedThisSession.add(idx);
     return MOTIVATIONS[idx];
   }
 
-  // Reset if all quotes exhausted
   if (usedThisSession.size >= MOTIVATIONS.length) {
     usedThisSession.clear();
   }
 
-  // Random pick with no repeat
   let idx;
-  do { idx = Math.floor(Math.random() * MOTIVATIONS.length); }
-  while (usedThisSession.has(idx));
+  do {
+    idx = Math.floor(Math.random() * MOTIVATIONS.length);
+  } while (usedThisSession.has(idx));
 
   usedThisSession.add(idx);
   return MOTIVATIONS[idx];
 }
 
 // ── Safety check on AI output ─────────────────
+// Rejects anything containing filtered terms
 function isSafe(text) {
   if (!text || text.length > 300) return false;
   const lower = text.toLowerCase();
   return !CONTENT_FILTERS.some(term => lower.includes(term));
 }
 
-// ── Optional Groq AI call ─────────────────────
+// ── AI fetch via Cloudflare Worker ────────────
+// 4 second timeout — if AI is slow, we give up
+// and use hardcoded quotes instead. User never waits.
 async function fetchAIMotivation() {
-  const { apiKey } = AI_CONFIG;
+  const { workerUrl, model } = AI_CONFIG;
   if (!workerUrl) return null;
 
   try {
-    // Calling Cloudflare and not groq api key (so Indirect call)
-    // The worker adds the secret key on its end
+    // AbortController = our 4 second timeout mechanism
+    const controller = new AbortController();
+    const timeout    = setTimeout(() => controller.abort(), 4000);
+
     const res = await fetch(workerUrl, {
       method: 'POST',
-      headers: {
-            'Content-Type': 'application/json',
-      },
+      signal: controller.signal,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model,
         max_tokens: 80,
@@ -223,12 +221,14 @@ async function fetchAIMotivation() {
             content: `Write a short motivational quote for high-performing tech and pharma professionals.
 Style: sharp, witty, honest — like the book "Good Morning Overachiever".
 Rules: max 30 words, no politics, no religion, no offensive content,
-no "hustle/grind/crush it", no toxic positivity. One quote only. No quotation marks.`
+no hustle culture clichés. One quote only. No quotation marks.`
           },
-          { role: 'user', content: 'Give me today\'s quote.' }
+          { role: 'user', content: "Give me today's quote." }
         ]
       })
     });
+
+    clearTimeout(timeout); // AI responded in time
 
     if (!res.ok) return null;
     const data  = await res.json();
@@ -236,12 +236,20 @@ no "hustle/grind/crush it", no toxic positivity. One quote only. No quotation ma
     return isSafe(quote) ? quote : null;
 
   } catch {
-    return null; // silent fallback — user never sees the error
+    // Timeout, network error, or anything else → silent fallback
+    return null;
   }
 }
 
-// ── Main export: called by jar.js on every tap ─
+// ── Main export ───────────────────────────────
+// Called by jar.js on every single tap.
+// AI first. Hardcoded if AI fails. Always instant.
 export async function getMotivation() {
   const aiQuote = await fetchAIMotivation();
-  return aiQuote ?? getLocalMotivation();
+
+  if (aiQuote) {
+    return aiQuote; // ✅ AI worked
+  }
+
+  return getLocalMotivation(); // 🔄 fallback
 }
